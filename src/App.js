@@ -121,15 +121,22 @@ function initVar(obj, level) {
 }
 
 function JsonToGo(json) {
-  const obj = JSON.parse(json)
+  let obj
+
+  try {
+    obj = JSON.parse(json)
+  } catch (e) {
+    return { go: '', init: '', error: e.message }
+  }
 
   let go = 'type Result '
   let init = 'result := Result'
+  const error = null
 
   go += JSToGo(obj, 1)
   init += initVar(obj, 1)
 
-  return { go, init }
+  return { go, init, error }
 }
 
 // ----------------------------------- CORE ------------------------------------
@@ -138,21 +145,15 @@ class App extends Component {
   state = {
     json: '',
     go : '',
-    init: ''
+    init: '',
+    error: ''
   }
 
-  getInput = (e) => {
-    const { value } = e.target
+  convert = (e) => {
+    const { value: json } = e.target
+    const { go, init, error } = JsonToGo(json)
 
-    this.setState({ json: value })
-  }
-
-  sendInput = () => {
-    const { json } = this.state
-
-    const { go, init } = JsonToGo(json)
-
-    this.setState({ go, init })
+    this.setState({ json, go, init, error })
   }
 
   formatCode(code) {
@@ -169,42 +170,90 @@ class App extends Component {
   }
 
   render() {
-    let { go, init } = this.state
+    let { go, init, error } = this.state
 
     go = this.formatCode(go)
     init = this.formatCode(init)
 
+    const style = {
+      app: {
+        display: 'flex',
+        justifyContent: 'space-between'
+      },
+      legend: {
+        display: 'flex',
+        justifyContent: 'space-between'
+      }
+    }
+
     return (
       <div style={{ margin: '10px 20px' }}>
         <h1>JSON to GO</h1>
-        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <div>
-            <textarea
-              cols={50}
-              rows={20}
-              onChange={this.getInput}
-            />
-          </div>
+        <section style={style.legend}>
+          <h2 style={{ flex: 1 }}>JSON</h2>
+          <h2 style={{ flex: 1 }}>Go Struct</h2>
+          <h2 style={{ flex: 1 }}>Go Variable</h2>
+        </section>
+        <section style={style.app}>
+          <Input change={this.convert} />
           <Code>{go}</Code>
           <Code>{init}</Code>
-        </div>
-        <button onClick={this.sendInput}>Traduzir</button>
+        </section>
+        <Warning error={error} />
       </div>
     )
   }
+}
+
+const Input = (props) => {
+  const style = {
+    container: {
+      display: 'flex'
+    },
+
+    input: {
+      resize: 'none',
+      border: '1px solid black'
+    }
+  }
+  return (
+    <div style={style.container}>
+      <textarea
+        cols={50}
+        rows={20}
+        wrap="hard"
+        style={style.input}
+        onChange={props.change}
+      />
+    </div>
+  )
 }
 
 const Code = (props) => {
   const style = {
     code: {
       minWidth: '33%',
-      border: '1px solid black'
+      maxWidth: '310px',
+      border: '1px solid black',
+      backgroundColor: 'rgba(0, 0, 0, 0.05)'
     }
   }
 
   return (
     <code style={style.code}>{props.children}</code>
   )
+}
+
+const Warning = (props) => {
+  const { error } = props
+
+  if (error) {
+    return (
+      <div>{error}</div>
+    )
+  }
+
+  return <div>Syntax OK</div>
 }
 
 export default App
