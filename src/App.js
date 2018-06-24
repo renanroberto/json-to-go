@@ -180,18 +180,31 @@ class App extends Component {
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
           <div>
             <textarea
-              cols={40}
-              rows={13}
+              cols={50}
+              rows={20}
               onChange={this.getInput}
             />
           </div>
-          <div>{go}</div>
-          <div>{init}</div>
+          <Code>{go}</Code>
+          <Code>{init}</Code>
         </div>
         <button onClick={this.sendInput}>Traduzir</button>
       </div>
     )
   }
+}
+
+const Code = (props) => {
+  const style = {
+    code: {
+      minWidth: '33%',
+      border: '1px solid black'
+    }
+  }
+
+  return (
+    <code style={style.code}>{props.children}</code>
+  )
 }
 
 export default App
