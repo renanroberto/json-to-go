@@ -67,7 +67,8 @@ function typeOfValue(value) {
     case "object":
       if (Array.isArray(value)) {
         const items = value.map(typeOfValue)
-        return `[]${findType(value[0])}{${items}}`
+        const itemsList = items.reduce((acc, curr) => `${acc}, ${curr}`)
+        return `[]${findType(value[0])}{${itemsList}}`
       }
       return ''
     default:
