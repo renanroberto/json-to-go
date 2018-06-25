@@ -37,11 +37,25 @@ result := Result{
   Languages: []string{"javascript", "golang"},
   Contact: {
     Email: "renanroberto1@gmail.com",
+    Tel: {
+      Home: "2199999999",
+      Work: "2188888888",
+    }
   },
   Active: true,
 }
 */
 // ---------------------------------- Example ----------------------------------
+
+// ----------------------------------- Theme -----------------------------------
+const typeColor = '#FF4477'
+const varColor = '#00BBCC'
+const numberColor = '#FF9900'
+const stringColor = '#00CC00'
+const defaultColor = '#CCCCCC'
+const specialColor = '#999999'
+const backgroundColor = '#333333'
+// ----------------------------------- Theme -----------------------------------
 
 // ----------------------------------- CORE ------------------------------------
 function findType(value) {
@@ -156,6 +170,30 @@ class App extends Component {
     this.setState({ json, go, init, error })
   }
 
+  syntaxHighlight(line) {
+    const types = ['type', 'int', 'float64', 'string', 'bool', 'struct']
+    const numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    const special = ['{', '}', '[', ']', '(', ')', ',', '},']
+
+    const splitted = line.match(/\S+/g) || []
+
+    line = splitted.map(word => {
+      if (types.includes(word)) {
+        return `<font color="${typeColor}">${word}</font>`
+      } else if (numbers.includes(word[0])) {
+        return `<font color="${numberColor}">${word}</font>`
+      } else if (word[0] === '`' || word[0] === '"'){
+        return `<font color="${stringColor}">${word}</font>`
+      } else if (special.includes(word)) {
+        return `<font color="${specialColor}">${word}</font>`
+      } else {
+        return `<font color="${varColor}">${word}</font>`
+      }
+    }).join(' ')
+
+    return <span dangerouslySetInnerHTML={{ __html: line }} />
+  }
+
   formatCode(code) {
     return code.split('\n').map((line, index) => {
       const key = index + ' - ' + line
@@ -164,6 +202,8 @@ class App extends Component {
 
       const match = line.match(/\t/g)
       const tabs = match ? match.map((v, i) => tab(v+i)) : ''
+
+      line = this.syntaxHighlight(line)
 
       return <div key={key}>{tabs}{line}</div>
     })
@@ -195,7 +235,7 @@ class App extends Component {
           <h2 style={{ flex: 1 }}>Go Variable</h2>
         </section>
         <section style={style.app}>
-          <Input change={this.convert} />
+          <Editor change={this.convert} />
           <Code>{go}</Code>
           <Code>{init}</Code>
         </section>
@@ -205,7 +245,7 @@ class App extends Component {
   }
 }
 
-const Input = (props) => {
+const Editor = (props) => {
   const style = {
     container: {
       display: 'flex'
@@ -235,7 +275,7 @@ const Code = (props) => {
       minWidth: '33%',
       maxWidth: '310px',
       border: '1px solid black',
-      backgroundColor: 'rgba(0, 0, 0, 0.05)'
+      backgroundColor: backgroundColor
     }
   }
 
